@@ -10,4 +10,5 @@ import lombok.*;
 public class CreateShortUrlRequest {
 
     private String originalUrl;
+    private String shortUrl;
 }

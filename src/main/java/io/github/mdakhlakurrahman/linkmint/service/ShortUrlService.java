@@ -3,6 +3,7 @@ package io.github.mdakhlakurrahman.linkmint.service;
 import io.github.mdakhlakurrahman.linkmint.dto.request.CreateShortUrlRequest;
 import io.github.mdakhlakurrahman.linkmint.dto.response.ShortUrlResponse;
 import io.github.mdakhlakurrahman.linkmint.entity.ShortUrl;
+import io.github.mdakhlakurrahman.linkmint.exception.ShortUrlNotFoundException;
 import io.github.mdakhlakurrahman.linkmint.generator.ShortCodeGenerator;
 import io.github.mdakhlakurrahman.linkmint.mapper.ShortUrlMapper;
 import io.github.mdakhlakurrahman.linkmint.repository.ShortUrlRepository;
@@ -43,5 +44,10 @@ public class ShortUrlService {
             shortCode = shortCodeGenerator.generate();
         } while (shortUrlRepository.existsByShortCode(shortCode));
         return shortCode;
+    }
+
+    public ShortUrl findByShortCode(String shortCode){
+        return shortUrlRepository.findByShortCode(shortCode)
+                .orElseThrow(()->new ShortUrlNotFoundException("Short URL not found: " + shortCode));
     }
 }
