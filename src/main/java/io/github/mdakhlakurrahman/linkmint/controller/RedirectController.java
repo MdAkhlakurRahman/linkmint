@@ -3,6 +3,7 @@ package io.github.mdakhlakurrahman.linkmint.controller;
 import io.github.mdakhlakurrahman.linkmint.entity.ShortUrl;
 import io.github.mdakhlakurrahman.linkmint.service.ShortUrlService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +24,7 @@ public class RedirectController {
 
     @GetMapping("/{shortCode}")
     public ResponseEntity<Void> redirect(@PathVariable String shortCode) {
-        log.info("Redirect requested for short code: {}",shortCode)
+        log.info("Redirect requested for short code: {}",shortCode);
         ShortUrl link = shortUrlService.findByShortCode(shortCode);
         return ResponseEntity
                 .status(HttpStatus.FOUND)

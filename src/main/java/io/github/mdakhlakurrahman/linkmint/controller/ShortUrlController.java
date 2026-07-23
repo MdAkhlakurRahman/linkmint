@@ -29,4 +29,10 @@ public class ShortUrlController {
                 .body(shortUrlService.createShortUrl(request));
     }
 
+    @DeleteMapping("/{shortCode}")
+    public ResponseEntity<Void> deleteShortUrl(@PathVariable String shortCode) {
+        shortUrlService.deleteByShortCode(shortCode);
+        return ResponseEntity.noContent().build();
+    }
+
 }
