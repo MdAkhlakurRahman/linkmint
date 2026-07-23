@@ -7,10 +7,12 @@ import io.github.mdakhlakurrahman.linkmint.exception.ShortUrlNotFoundException;
 import io.github.mdakhlakurrahman.linkmint.generator.ShortCodeGenerator;
 import io.github.mdakhlakurrahman.linkmint.mapper.ShortUrlMapper;
 import io.github.mdakhlakurrahman.linkmint.repository.ShortUrlRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @Service
 public class ShortUrlService {
 
@@ -28,6 +30,7 @@ public class ShortUrlService {
 
     public ShortUrlResponse createShortUrl(CreateShortUrlRequest request) {
         String shortCode = generateUniqueShortCode();
+        log.info("Generated short code: {}", shortCode);
         ShortUrl shortUrl = shortUrlMapper.toEntity(
                 request,
                 shortCode,
@@ -35,6 +38,7 @@ public class ShortUrlService {
         );
 
         ShortUrl saved = shortUrlRepository.save(shortUrl);
+        log.info("Successfully created short URL with code: {}", shortCode);
         return shortUrlMapper.toResponse(saved);
     }
 
@@ -46,8 +50,13 @@ public class ShortUrlService {
         return shortCode;
     }
 
-    public ShortUrl findByShortCode(String shortCode){
-        return shortUrlRepository.findByShortCode(shortCode)
-                .orElseThrow(()->new ShortUrlNotFoundException("Short URL not found: " + shortCode));
+    public ShortUrl findByShortCode(String shortCode) {
+        ShortUrl shortUrl = shortUrlRepository.findByShortCode(shortCode)
+                .orElseThrow(() -> {
+                    log.warn("Short code {} not found", shortCode);
+                    return new ShortUrlNotFoundException("Short URL not found: " + shortCode);
+                });
+        log.info("Found original URL for short code: {}", shortCode);
+        return shortUrl;
     }
 }
