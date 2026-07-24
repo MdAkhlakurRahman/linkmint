@@ -2,7 +2,6 @@ package io.github.mdakhlakurrahman.linkmint.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 
@@ -23,4 +22,9 @@ public class ShortUrl {
     private String shortCode;
     @Column(nullable = false)
     private LocalDateTime createdAt;
+    @Builder.Default
+    @Column(nullable = false)
+    private Long clickCount=0L;
+
+    private LocalDateTime expiresAt;
 }

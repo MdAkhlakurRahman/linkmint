@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.hibernate.validator.constraints.URL;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -14,4 +16,6 @@ public class CreateShortUrlRequest {
     @URL(message = "Please provide a valid URL")
     @NotBlank(message = "Original URL is required")
     private String originalUrl;
+
+    private LocalDateTime expiresAt;
 }
