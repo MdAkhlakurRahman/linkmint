@@ -3,6 +3,7 @@ package io.github.mdakhlakurrahman.linkmint.service;
 import io.github.mdakhlakurrahman.linkmint.dto.request.CreateShortUrlRequest;
 import io.github.mdakhlakurrahman.linkmint.dto.response.ShortUrlResponse;
 import io.github.mdakhlakurrahman.linkmint.entity.ShortUrl;
+import io.github.mdakhlakurrahman.linkmint.exception.ShortUrlExpiredException;
 import io.github.mdakhlakurrahman.linkmint.exception.ShortUrlNotFoundException;
 import io.github.mdakhlakurrahman.linkmint.generator.ShortCodeGenerator;
 import io.github.mdakhlakurrahman.linkmint.mapper.ShortUrlMapper;
@@ -10,6 +11,7 @@ import io.github.mdakhlakurrahman.linkmint.repository.ShortUrlRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -74,7 +76,6 @@ public class ShortUrlService {
         log.info("Cache MISS for short code: {}", shortCode);
 
         // 4. Query Database
-
         ShortUrl shortUrl = shortUrlRepository.findByShortCode(shortCode)
                 .orElseThrow(() -> {
                     log.warn("Short code {} not found", shortCode);
@@ -83,11 +84,15 @@ public class ShortUrlService {
 
         // 5. Store in Redis for 10 minutes
         redisTemplate.opsForValue().set(cacheKey, shortUrl, Duration.ofMinutes(10));
-
         log.info("Stored short code {} in Redis cache", shortCode);
+
+        if (shortUrl.getExpiresAt() != null && shortUrl.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new ShortUrlExpiredException("Short URL has expired: " + shortCode);
+        }
 
         // 6. Return Response
         return shortUrl;
+
     }
 
 
@@ -105,4 +110,14 @@ public class ShortUrlService {
         redisTemplate.delete(cacheKey);
         log.info("Removed short URL {} from Redis cache", shortCode);
     }
+
+    @Transactional
+    public void incrementClickCount(String shortCode) {
+        int updated = shortUrlRepository.incrementClickCount(shortCode);
+        if (updated == 0) {
+            throw new ShortUrlNotFoundException("Short URL not found: " + shortCode);
+        }
+        log.info("Incremented click count for {}", shortCode);
+    }
+
 }

@@ -14,6 +14,7 @@ public class ShortUrlMapper {
                              LocalDateTime createdAt) {
         return ShortUrl.builder()
                 .originalUrl(request.getOriginalUrl())
+                .expiresAt(request.getExpiresAt())
                 .shortCode(shortCode)
                 .createdAt(createdAt)
                 .build();
